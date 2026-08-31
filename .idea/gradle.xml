@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Frontend_BenianausKennethIndarwan" />
+        <option name="modules">
+          <set>
+            <option value="/mnt/DATA/College/Akademis/Sem 3/OOP Praktikum/ProjectOOP/Frontend_BenianausKennethIndarwan" />
+            <option value="/mnt/DATA/College/Akademis/Sem 3/OOP Praktikum/ProjectOOP/Frontend_BenianausKennethIndarwan/core" />
+            <option value="/mnt/DATA/College/Akademis/Sem 3/OOP Praktikum/ProjectOOP/Frontend_BenianausKennethIndarwan/lwjgl3" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
