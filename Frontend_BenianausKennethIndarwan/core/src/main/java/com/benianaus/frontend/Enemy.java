@@ -1,5 +1,5 @@
 package com.benianaus.frontend;
-import java.awt.*;
+import com.badlogic.gdx.graphics.Color;
 
 public class Enemy extends GameObject{
 
@@ -25,24 +25,14 @@ public class Enemy extends GameObject{
     }
 
     public boolean takeDamage(int damage) {
-        // 1. Kurangi hp sebesar nilai damage.
-        // 2. HP tidak boleh kurang dari 0.
-        // 3. Tampilkan HP saat ini dalam format: [EnemyName] took [damage] damage! HP: [currentHP]/[maxHP]
-        // 4. Jika HP mencapai 0, tampilkan bahwa Enemy telah dikalahkan dalam format: [EnemyName] was defeated!
-
-        if (getHp() <= 0) {
-            return false;
-        }
-
+        boolean wasAlive = isAlive();
         setHp(getHp() - damage);
-
-        if (this.hp > 0) {
-            System.out.println(getName() + " took " + damage + " damage! Remaining HP: " + getHp() + "/" + getMaxHp());
-            return false;
-        } else {
+        System.out.println(getName() + " took " + damage + " damage! HP: " + getHp() + "/" + getMaxHp());
+        if (wasAlive && getHp() == 0) {
             System.out.println(getName() + " was defeated!");
             return true;
         }
+        return false;
     }
 
     public void attack(Player player, int damage) {

@@ -1,6 +1,6 @@
 package com.benianaus.frontend;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import java.awt.*;
 
 public abstract class GameObject {
 
@@ -25,7 +25,10 @@ public abstract class GameObject {
     }
 
     public void render(ShapeRenderer shapeRenderer){
-
+        if (shapeRenderer != null && color != null) {
+            shapeRenderer.setColor(this.color);
+            shapeRenderer.rect(x, y, width, height);
+        }
     }
 
     public float getX() {

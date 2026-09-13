@@ -1,5 +1,5 @@
 package com.benianaus.frontend;
-import java.awt.*;
+import com.badlogic.gdx.graphics.Color;
 
 public class Player extends GameObject {
 

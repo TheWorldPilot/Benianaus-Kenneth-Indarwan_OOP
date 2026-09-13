@@ -1,4 +1,4 @@
-package com.netlab.frontend;
+package com.benianaus.frontend;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -17,11 +17,12 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
 
     // TODO 1: Declare fields for Player, Fairy, Boss, Items, and List<GameObject>
-    Player player;
-    Fairy fairy;
-    Boss boss;
-    Item items;
-    List<GameObject> gameObjects;
+    private Player player;
+    private Fairy fairy;
+    private Boss boss;
+    private Item powerItem;
+    private Item pointItem;
+    private List<GameObject> gameObjects;
 
 
     @Override
@@ -29,36 +30,39 @@ public class Main extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         gameObjects = new ArrayList<>();
 
-        // TODO 2: Instantiate Player (Red square) at (280, 40)
-        Player player = new Player(280, 540, "Reimu Hakurei", 100, 15, 3);
+        // 1. Player: Red square (stationary) at bottom
+        player = new Player(280, 40, "Reimu Hakurei", 100, 15, 3);
 
-        // TODO 3: Instantiate Fairy (Pink square) at (150, 380)
-        Fairy fairy = new Fairy(150, 380, "Fairy", 100);
+        // 2. Fairy: Pink square (stationary, small)
+        fairy = new Fairy(150, 380, "Stage 1 Fairy", 20);
 
+        // 3. Boss: Blue square (stationary, larger size)
+        boss = new Boss(380, 400, "Cirno", 150);
 
-        // TODO 4: Instantiate Boss (Blue square) at (380, 400)
-        Boss boss = new Boss(150, 380, "Boss", 100);
+        // 4. Items: White squares (moving downwards linearly)
+        powerItem = new Item(200, 450, 16, 16, 80f, "Power");
+        pointItem = new Item(320, 480, 12, 12, 120f, "Point");
 
-        // TODO 5: Instantiate Items (White squares) with downward speeds
-        Item item= new Item(150, 380, 30, 30, -20, "Fairy", 100);
-
-        // TODO 6: Add all entities into the gameObjects list polymorphically
-
+        gameObjects.add(player);
+        gameObjects.add(fairy);
+        gameObjects.add(boss);
+        gameObjects.add(powerItem);
+        gameObjects.add(pointItem);
     }
 
     @Override
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
-        // 1. Polymorphic Update Loop: Items move downward automatically via Item.update(delta)
+        // Update logic: items move downwards linearly
         for (GameObject obj : gameObjects) {
             obj.update(delta);
         }
 
-        // 2. Clear Screen
+        // Clear screen
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
 
-        // 3. Polymorphic Render Loop: Draw hitboxes with ShapeRenderer
+        // Render filled hitboxes with ShapeRenderer
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (GameObject obj : gameObjects) {
             obj.render(shapeRenderer);

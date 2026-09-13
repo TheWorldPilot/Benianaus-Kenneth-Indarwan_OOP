@@ -1,6 +1,6 @@
 package com.benianaus.frontend;
 
-import java.awt.*;
+import com.badlogic.gdx.graphics.Color;
 
 public class Boss extends Enemy{
     public Boss(String name, int hp){

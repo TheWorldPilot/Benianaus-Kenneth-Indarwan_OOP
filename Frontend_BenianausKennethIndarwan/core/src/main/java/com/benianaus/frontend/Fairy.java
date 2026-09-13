@@ -1,6 +1,6 @@
 package com.benianaus.frontend;
 
-import java.awt.*;
+import com.badlogic.gdx.graphics.Color;
 
 public class Fairy extends Enemy{
     protected String name;
