@@ -1,6 +1,8 @@
-package com.benianaus.frontend;
+package com.benianaus.frontend.objects.enemies;
 
 import com.badlogic.gdx.graphics.Color;
+import com.benianaus.frontend.objects.Collidable;
+import com.benianaus.frontend.objects.Player;
 
 public class Boss extends Enemy{
     public Boss(String name, int hp){
@@ -12,5 +14,14 @@ public class Boss extends Enemy{
     }
 
     // Tipe inheritancenya adalah tipe inheritance Hierarchical karena Boss dan Fairy merupakan hasil dari satu Superclass yaitu GameObject->Enemy.
+
+    @Override
+    public void onCollision(Collidable other) {
+        // TODO: Cek apakah other yang diterima method ini adalah Player
+        if (other instanceof Player){
+            // TODO: Cetak "Player touches boss"
+            System.out.println("Player touches Boss");
+        }
+    }
 
 }

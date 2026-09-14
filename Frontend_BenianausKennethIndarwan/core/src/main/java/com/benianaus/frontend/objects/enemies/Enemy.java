@@ -1,7 +1,9 @@
-package com.benianaus.frontend;
+package com.benianaus.frontend.objects.enemies;
 import com.badlogic.gdx.graphics.Color;
+import com.benianaus.frontend.objects.GameObject;
+import com.benianaus.frontend.objects.Player;
 
-public class Enemy extends GameObject{
+public class Enemy extends GameObject {
 
     protected String name;
     protected int hp;

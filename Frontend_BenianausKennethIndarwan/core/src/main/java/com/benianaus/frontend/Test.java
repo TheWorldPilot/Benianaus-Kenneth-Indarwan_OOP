@@ -1,5 +1,11 @@
 package com.benianaus.frontend;
 
+import com.benianaus.frontend.objects.enemies.Boss;
+import com.benianaus.frontend.objects.enemies.Enemy;
+import com.benianaus.frontend.objects.enemies.Fairy;
+import com.benianaus.frontend.objects.items.Item;
+import com.benianaus.frontend.objects.Player;
+
 public class Test {
     public static void main(String[] args) {
         System.out.println("=== TOUHOU OOP PRACTICUM - MODULE 1: BASIC CLASSES & OBJECT INTERACTION ===");
