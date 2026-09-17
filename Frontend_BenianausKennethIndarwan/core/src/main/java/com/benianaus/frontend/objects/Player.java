@@ -93,10 +93,11 @@ public class Player extends GameObject {
     @Override
     public void onCollision(Collidable other) {
         // TODO: Cek apakah other yang diterima method ini adalah Item
-        if (other instanceof Item){
+        if (other instanceof Item && !((Item) other).collected){
             // TODO: Cetak "Player touches items" lalu panggil collectItem((Item) other)
             System.out.println("Player touches items");
             collectItem((Item) other);
+            ((Item) other).collected = true;
         }
     }
 
@@ -138,9 +139,6 @@ public class Player extends GameObject {
 
     public void collectItem(Item item) {
         System.out.println(getName() + " collected " + item.getItemType() + "!");
-        if (item.getScoreValue() > 0) {
-            addScore(item.getScoreValue());
-        }
 
         ItemType type = item.getItemTypeEnum();
         if (type != null) {

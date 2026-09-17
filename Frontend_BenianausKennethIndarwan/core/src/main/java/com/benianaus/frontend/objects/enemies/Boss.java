@@ -5,6 +5,9 @@ import com.benianaus.frontend.objects.Collidable;
 import com.benianaus.frontend.objects.Player;
 
 public class Boss extends Enemy{
+    private int collisionCooldown;
+    private long currTime;
+
     public Boss(String name, int hp){
         super(380, 400, 48, 48, Color.BLUE, name, hp, 5000L);
     }
@@ -20,7 +23,14 @@ public class Boss extends Enemy{
         // TODO: Cek apakah other yang diterima method ini adalah Player
         if (other instanceof Player){
             // TODO: Cetak "Player touches boss"
-            System.out.println("Player touches Boss");
+            if (collisionCooldown == 0) {
+                System.out.println("Player touches boss");
+                collisionCooldown = 1;
+                currTime = System.currentTimeMillis();
+            }
+            if (System.currentTimeMillis() - currTime >= 1000){
+                collisionCooldown = 0;
+            }
         }
     }
 

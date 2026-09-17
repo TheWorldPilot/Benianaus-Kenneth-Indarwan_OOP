@@ -72,6 +72,10 @@ public class Main extends ApplicationAdapter {
                     // TODO: Panggil a.onCollision(b) dan b.onCollision(a)
                     a.onCollision(b);
                     b.onCollision(a);
+
+                    if (b instanceof Item){
+                        entities.remove(b);
+                    }
                 }
             }
         }
