@@ -20,9 +20,9 @@ public class Boss extends Enemy{
 
     @Override
     public void onCollision(Collidable other) {
-        // TODO: Cek apakah other yang diterima method ini adalah Player
+        // Cek apakah other yang diterima method ini adalah Player
         if (other instanceof Player){
-            // TODO: Cetak "Player touches boss"
+            // Cetak "Player touches boss"
             if (collisionCooldown == 0) {
                 System.out.println("Player touches boss");
                 collisionCooldown = 1;

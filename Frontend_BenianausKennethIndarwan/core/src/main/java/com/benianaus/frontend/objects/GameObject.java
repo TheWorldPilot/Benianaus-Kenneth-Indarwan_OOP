@@ -11,6 +11,7 @@ public abstract class GameObject implements Collidable {
     protected float height;
     protected float speed;
     protected Color color;
+    protected boolean active = true;
 
     public GameObject(float x, float y, float width, float height, float speed, Color color) {
         this.x = x;
@@ -26,7 +27,7 @@ public abstract class GameObject implements Collidable {
     }
 
     public void render(ShapeRenderer shapeRenderer){
-        if (shapeRenderer != null && color != null) {
+        if (shapeRenderer != null && color != null && active) {
             shapeRenderer.setColor(this.color);
             shapeRenderer.rect(x, y, width, height);
         }
@@ -34,19 +35,44 @@ public abstract class GameObject implements Collidable {
 
     @Override
     public Rectangle getCoreHitbox() {
-        // TODO: kembalikan Rectangle baru sesuai x, y, width, height object ini
+        // kembalikan Rectangle baru sesuai x, y, width, height object ini
         return new Rectangle(x, y, width, height);
     }
 
     @Override
     public Rectangle getGrazeHitbox() {
-        // TODO: kembalikan Rectangle dengan padding +10px di setiap sisi
+        // kembalikan Rectangle dengan padding +10px di setiap sisi
         return new Rectangle(x-10, y-10, width+20, height+20);
     }
 
     @Override
     public void onCollision(Collidable other) {
         // Base collision handler (boleh di-override oleh subclass yang butuh bereaksi)
+    }
+
+    public boolean isDestroyed() {
+        // Kembalikan true jika object TIDAK aktif (active == false)
+        if (!active){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void destroy() {
+        // tandai object ini sebagai tidak aktif
+        active = false;
+    }
+
+    public boolean isOffScreen(float screenWidth, float screenHeight) {
+        // kembalikan true jika posisi x atau y sudah keluar dari batas layar
+        // Gunakan margin toleransi 50px di setiap sisi, supaya objek yang baru
+        // sedikit melewati tepi layar tidak langsung dianggap hilang.
+        if (x < -50 || y < -50 || x > (screenWidth+50) || y > (screenHeight+50)){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public float getX() {

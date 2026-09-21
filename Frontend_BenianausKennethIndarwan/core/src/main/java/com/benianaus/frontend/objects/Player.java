@@ -2,6 +2,7 @@ package com.benianaus.frontend.objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.benianaus.frontend.objects.bullets.Bullet;
 import com.benianaus.frontend.objects.enemies.Enemy;
 import com.benianaus.frontend.objects.items.Item;
 import com.benianaus.frontend.objects.items.ItemType;
@@ -92,13 +93,21 @@ public class Player extends GameObject {
 
     @Override
     public void onCollision(Collidable other) {
-        // TODO: Cek apakah other yang diterima method ini adalah Item
+        // Cek apakah other yang diterima method ini adalah Item
         if (other instanceof Item && !((Item) other).collected){
-            // TODO: Cetak "Player touches items" lalu panggil collectItem((Item) other)
+            // Cetak "Player touches items" lalu panggil collectItem((Item) other)
             System.out.println("Player touches items");
             collectItem((Item) other);
             ((Item) other).collected = true;
         }
+    }
+
+    public Bullet shootBullet() {
+        int damage = 10 + power;
+        System.out.println(name + " shoots bullet dealing " + damage + " DMG!");
+        // kembalikan Bullet baru, diposisikan di tengah atas Player
+        // (x + width/2 - 4, y + height), bertipe BulletType.AMULET, dengan damage di atas
+        return new Bullet(x+width/2-4, y+height, BulletType.AMULET, damage);
     }
 
     public String getName() {
@@ -138,6 +147,8 @@ public class Player extends GameObject {
     }
 
     public void collectItem(Item item) {
+        if (item.isDestroyed()) return;
+
         System.out.println(getName() + " collected " + item.getItemType() + "!");
 
         ItemType type = item.getItemTypeEnum();
@@ -178,7 +189,13 @@ public class Player extends GameObject {
             addScore(item.getScoreValue());
             System.out.println(name + " collected " + item.getItemType() + "!");
         }
+
+        // Tandai item ini sebagai destroyed agar nanti dihapus oleh Iterator
+        // Panggil method destroy() milik item di sini!
+        item.destroy();
     }
+
+
 
 
 

@@ -10,7 +10,7 @@ public enum ItemType {
     private final int powerBonus;
 
     ItemType(long scoreValue, int powerBonus) {
-        // TODO: inisialisasi scoreValue dan powerBonus dari parameter constructor
+        // inisialisasi scoreValue dan powerBonus dari parameter constructor
         this.scoreValue = scoreValue;
         this.powerBonus = powerBonus;
     }

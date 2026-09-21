@@ -51,7 +51,7 @@ public class Item extends GameObject {
 
     @Override
     public void onCollision(Collidable other) {
-        // TODO: Cek apakah other yang diterima method ini adalah Player
+        // Cek apakah other yang diterima method ini adalah Player
         if (other instanceof Player){
             // Item pickup is handled on the Player side via collectItem()
         }

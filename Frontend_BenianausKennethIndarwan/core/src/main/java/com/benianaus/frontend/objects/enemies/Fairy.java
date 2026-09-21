@@ -23,9 +23,9 @@ public class Fairy extends Enemy{
 
     @Override
     public void onCollision(Collidable other) {
-        // TODO: Cek apakah other yang diterima method ini adalah Player
+        // Cek apakah other yang diterima method ini adalah Player
         if (other instanceof Player){
-            // TODO: Cetak "Player touches fairy"
+            // Cetak "Player touches fairy"
             if (collisionCooldown == 0) {
                 System.out.println("Player touches fairy");
                 collisionCooldown = 1;

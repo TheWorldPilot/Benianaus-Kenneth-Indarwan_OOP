@@ -1,5 +1,6 @@
 package com.benianaus.frontend;
 
+import com.benianaus.frontend.objects.bullets.Bullet;
 import com.benianaus.frontend.objects.enemies.Boss;
 import com.benianaus.frontend.objects.enemies.Enemy;
 import com.benianaus.frontend.objects.enemies.Fairy;
@@ -64,5 +65,11 @@ public class Test {
 
         System.out.println("\n=== Module 2 Test Completed Successfully ===");
 
+        Player reimu3 = new Player("Reimu Hakurei", 100, 15, 3);
+        Bullet bullet = reimu.shootBullet();
+        System.out.println("Bullet created at: (" + bullet.getX() + ", " + bullet.getY() + ") | Damage: " + bullet.getDamage());
+        bullet.update(0.1f);
+        System.out.println("Bullet Y after 0.1s: " + bullet.getY());
+        System.out.println("Is bullet off screen? " + bullet.isOffScreen(640, 480));
     }
 }
