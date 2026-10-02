@@ -59,50 +59,50 @@ public class ScoreController {
 
     // TODO:
     // 1. Beri anotasi yang sesuai untuk endpoint GET beserta endpoint yang sesuai
-    @GetMapping("/{scoreId}")
+    @GetMapping
     public ResponseEntity<List<Score>> getAllScores() {
         // 2. Gunakan scoreService untuk memanggil getAllScores() dan simpan scores tersebut ke suatu variabel menggunakan List
         // 3. Kembalikan variabel berisi scores tersebut
         List<Score> newScoreList = scoreService.getAllScores();
-        return ResponseEntity.status(HttpStatus.OK).body(newScoreList);
+        return ResponseEntity.ok(newScoreList);
     }
 
     // TODO:
     // 1. Beri anotasi yang sesuai untuk endpoint GET beserta endpoint yang sesuai
-    @GetMapping("/{scoreId}")
+    @GetMapping("/leaderboard")
     public ResponseEntity<List<Score>> getLeaderboardByPoint(@RequestParam(defaultValue = "10") Integer limit){
         // 4. Gunakan scoreService untuk memanggil getLeaderboard() dengan parameter yang sesuai
         //    dan simpan scores tersebut ke suatu variabel menggunakan List
         // 5. Kembalikan variabel berisi scores tersebut
         List<Score> newLeaderboardList = scoreService.getLeaderboard(limit);
-        return ResponseEntity.status(HttpStatus.OK).body(newLeaderboardList);
+        return ResponseEntity.ok(newLeaderboardList);
     }
 
     // TODO:
     // 1. Beri anotasi yang sesuai untuk endpoint GET beserta endpoint yang sesuai
-    @GetMapping("/{scoreId}")
+    @GetMapping("/above/{minValue}")
     public ResponseEntity<List<Score>> getScoresAboveValue(@PathVariable Integer minValue){
         // 3. Gunakan scoreService untuk memanggil getScoreAboveValue() dengan parameter yang sesuai
         //    dan simpan scores tersebut ke suatu variabel menggunakan List
         // 4. Kembalikan variabel berisi scores tersebut
         List<Score> listOfScoreAboveValue = scoreService.getScoreAboveValue(minValue);
-        return ResponseEntity.status(HttpStatus.OK).body(listOfScoreAboveValue);
+        return ResponseEntity.ok(listOfScoreAboveValue);
     }
 
     // TODO:
     // 1. Beri anotasi yang sesuai untuk endpoint GET beserta endpoint yang sesuai
-    @GetMapping("/{scoreId}")
+    @GetMapping("/recent")
     public ResponseEntity<List<Score>> getRecentScores(){
         // 2. Gunakan scoreService untuk memanggil getRecentScores() dengan parameter yang sesuai
         //    dan simpan scores tersebut ke suatu variabel menggunakan List
         // 3. Kembalikan variabel berisi scores tersebut
         List<Score> recentScores = scoreService.getRecentScores();
-        return ResponseEntity.status(HttpStatus.OK).body(recentScores);
+        return ResponseEntity.ok(recentScores);
     }
 
     // TODO:
     // 1. Beri anotasi yang sesuai untuk endpoint DELETE beserta endpoint yang sesuai
-    @DeleteMapping
+    @DeleteMapping("/{scoreId}")
     public ResponseEntity<?> deleteScore(@PathVariable UUID scoreId){
         // 3. buat try-catch block
         // pada try block:
@@ -112,7 +112,7 @@ public class ScoreController {
         //  kembalikan response error dengan status NOT_FOUND beserta body error yang sesuai
         try {
             scoreService.deleteScore(scoreId);
-            return ResponseEntity.status(HttpStatus.OK).body("ID "+scoreId+" succesfully deleted");
+            return ResponseEntity.ok("{\"message\": \"Score succesfully deleted\"}");
         } catch (RuntimeException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ID "+scoreId+" not found");
         }
