@@ -2,6 +2,9 @@ package com.benianaus.frontend;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.Input;
@@ -12,43 +15,53 @@ import com.benianaus.frontend.objects.items.Item;
 import com.benianaus.frontend.objects.Player;
 import com.benianaus.frontend.objects.GameObject;
 import com.benianaus.frontend.objects.items.ItemType;
+import com.benianaus.frontend.systems.AssetManager;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.benianaus.frontend.systems.EntityFactory.*;
+
 public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
 
     // Declare fields for Player, Fairy, Boss, Items, and List<GameObject>
+    private SpriteBatch batch;
     private Player player;
-    private Fairy fairy;
+    private List<Fairy> fairy;
     private Boss boss;
     private Item powerItem;
     private Item pointItem;
     private List<GameObject> entities;
 
+    protected TextureRegion sprite;
+    protected Animation<TextureRegion> animation;
+    protected float stateTime = 0f;
 
     @Override
     public void create() {
+        batch = new SpriteBatch();
+
         shapeRenderer = new ShapeRenderer();
+        fairy = new ArrayList<>();
         entities = new ArrayList<>();
 
-        // 1. Player: Red square (stationary) at bottom
-        player = new Player(280, 40, "Reimu Hakurei", 100, 15, 3);
+        AssetManager.getInstance().init();
 
-        // 2. Fairy: Pink square (stationary, small)
-        fairy = new Fairy(150, 380, "Stage 1 Fairy", 20);
+        player = createPlayer(280, 40, "Reimu Hakurei", 100, 15, 3);
+        Fairy fairyRed = createFairy(150, 380, "Red Fairy", 20);
+        Fairy fairyBlue = createFairy(250, 380, "Blue Fairy", 20, "fairy_idle_blue");
+        fairy.add(fairyRed);
+        fairy.add(fairyBlue);
+        boss = createBoss(380, 400, "Rumia", 150);
 
-        // 3. Boss: Blue square (stationary, larger size)
-        boss = new Boss(380, 400, "Cirno", 150);
-
-        // 4. Items: White squares (moving downwards linearly)
-        powerItem = new Item(200, 450, 16, 16, 80f, ItemType.POWER, 500L);
-        pointItem = new Item(320, 480, 12, 12, 120f, ItemType.POINT, 1000L);
+        powerItem = createItem(200, 450, ItemType.POWER);
+        pointItem = createItem(320, 480, ItemType.POINT);
 
         entities.add(player);
-        entities.add(fairy);
+        entities.add(fairyRed);
+        entities.add(fairyBlue);
         entities.add(boss);
         entities.add(powerItem);
         entities.add(pointItem);
@@ -65,7 +78,7 @@ public class Main extends ApplicationAdapter {
 
         // Jika tombol Z baru saja ditekan, tambahkan bullet baru hasil player.shootBullet() ke dalam list entities.
         // Clue: Gdx.input.isKeyJustPressed()
-        if(Gdx.input.isKeyJustPressed(Input.Keys.Z)){
+        if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
             entities.add(player.shootBullet());
         }
 
@@ -80,12 +93,12 @@ public class Main extends ApplicationAdapter {
                 GameObject b = entities.get(j);
 
                 // Cek apakah getCoreHitbox() milik a dan b saling overlap (gunakan method .overlaps() milik Rectangle)
-                if ((a.getCoreHitbox()).overlaps(b.getCoreHitbox())){
+                if ((a.getCoreHitbox()).overlaps(b.getCoreHitbox())) {
                     // Panggil a.onCollision(b) dan b.onCollision(a)
                     a.onCollision(b);
                     b.onCollision(a);
 
-                    if (b instanceof Item){
+                    if (b instanceof Item) {
                         entities.remove(b);
                     }
                 }
@@ -95,24 +108,26 @@ public class Main extends ApplicationAdapter {
         // Clear screen
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
 
-        // Render filled hitboxes with ShapeRenderer
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        for (GameObject obj : entities) {
-            // Gunakan if statement untuk mengecek apakah entity belum hancur (!entity.isDestroyed()).
-            // kalo iya, panggil method entity.render(shapeRenderer);
-            if (!obj.isDestroyed()){
-                obj.render(shapeRenderer);
+        batch.begin();
+        for (GameObject entity : entities) {
+            if (!entity.isDestroyed()) {
+                // TODO-DONE: Buat agar setiap entity melakukan method .render() dengan mengoper parameter SpriteBatch.
+                entity.render(batch);
             }
         }
-        shapeRenderer.end();
+        batch.end();
     }
 
     @Override
     public void dispose() {
-        if (shapeRenderer != null) {
-            shapeRenderer.dispose();
+        if (batch != null) {
+            batch.dispose();
         }
+
+        // TODO-DONE: Panggil dispose untuk AssetManager agar Texture yang dimuat juga dilepas.
+        AssetManager.getInstance().dispose();
     }
+
 
     public <T extends GameObject> void updateAndClean(List<T> list, float delta, float screenWidth, float screenHeight) {
         // 1. Dapatkan Iterator<T> dari list yang diberikan.

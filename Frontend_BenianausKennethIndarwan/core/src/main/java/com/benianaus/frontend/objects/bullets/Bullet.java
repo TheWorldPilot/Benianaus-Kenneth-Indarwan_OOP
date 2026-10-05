@@ -1,6 +1,5 @@
 package com.benianaus.frontend.objects.bullets;
 
-import com.benianaus.frontend.objects.BulletType;
 import com.benianaus.frontend.objects.Collidable;
 import com.benianaus.frontend.objects.GameObject;
 import com.badlogic.gdx.graphics.Color;
@@ -11,14 +10,14 @@ public class Bullet extends GameObject {
     private int damage;
 
     public Bullet(float x, float y, BulletType bulletType, int damage) {
-        super(x, y, 8, 16, 400f, Color.YELLOW);
+        super(x, y, 16, 16, 400f, Color.YELLOW);
         // Inisialisasi bulletType dan damage dari parameter
         this.bulletType = bulletType;
         this.damage = damage;
     }
 
     public Bullet(float x, float y, float speed, BulletType bulletType, int damage) {
-        super(x, y, 8, 16, speed, Color.YELLOW);
+        super(x, y, 16, 16, speed, Color.YELLOW);
         // Inisialisasi bulletType dan damage dari parameter
         this.bulletType = bulletType;
         this.damage = damage;

@@ -1,7 +1,11 @@
 package com.benianaus.frontend.objects;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import org.w3c.dom.Text;
 
 public abstract class GameObject implements Collidable {
 
@@ -13,6 +17,11 @@ public abstract class GameObject implements Collidable {
     protected Color color;
     protected boolean active = true;
 
+    protected TextureRegion sprite;
+    protected Animation<TextureRegion> animation;
+    protected float stateTime = 0f;
+
+
     public GameObject(float x, float y, float width, float height, float speed, Color color) {
         this.x = x;
         this.y = y;
@@ -23,13 +32,25 @@ public abstract class GameObject implements Collidable {
     }
 
     public void update(float delta){
-        //Di sini, update dibiarkan kosong karena tidak semua sub-class nantinya membutuhkan update yang sama, sehingga update akan diisi di sub-class lain yang membuutuhkan saja
+        // TODO-DONE: Tambah waktu internal objek agar animasi bergerak maju
+        stateTime = stateTime+delta;
     }
 
     public void render(ShapeRenderer shapeRenderer){
         if (shapeRenderer != null && color != null && active) {
             shapeRenderer.setColor(this.color);
             shapeRenderer.rect(x, y, width, height);
+        }
+    }
+
+    public void render(SpriteBatch batch) {
+        if (batch != null && active) {
+            if (animation != null) {
+                TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
+                batch.draw(currentFrame, x, y, width, height);
+            } else if (sprite != null) {
+                batch.draw(sprite, x, y, width, height);
+            }
         }
     }
 
@@ -121,5 +142,21 @@ public abstract class GameObject implements Collidable {
 
     public void setColor(Color color){
         this.color = color;
+    }
+
+    public TextureRegion getSprite(){
+        return sprite;
+    }
+
+    public void setSprite(TextureRegion sprite){
+        this.sprite = sprite;
+    }
+
+    public Animation<TextureRegion> getAnimation(){
+        return animation;
+    }
+
+    public void setAnimation(Animation<TextureRegion> animation){
+        this.animation = animation;
     }
 }

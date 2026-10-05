@@ -1,4 +1,4 @@
-package com.benianaus.frontend.objects;
+package com.benianaus.frontend.objects.bullets;
 
 public enum BulletType {
     DANMAKU,
