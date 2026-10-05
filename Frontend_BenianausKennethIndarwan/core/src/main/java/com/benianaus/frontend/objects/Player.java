@@ -85,17 +85,6 @@ public class Player extends GameObject {
 
     @Override
     public void update(float delta){
-        if (Gdx.input != null) {
-            if(Gdx.input.isKeyPressed(Input.Keys.W)){
-                y += speed * delta;
-            } else if (Gdx.input.isKeyPressed(Input.Keys.S)){
-                y -= speed * delta;
-            } else if (Gdx.input.isKeyPressed(Input.Keys.A)){
-                x -= speed * delta;
-            } else if (Gdx.input.isKeyPressed(Input.Keys.D)){
-                x += speed * delta;
-            }
-        }
         // TODO-DONE 1: panggil update(delta) milik GameObject melalui super.
         super.update(delta);
 
@@ -114,14 +103,14 @@ public class Player extends GameObject {
                 x -= speed * delta;
                 // TODO 3: Ganti nilai dx sesuai dengan arahnya.
                 // (Kalau ke kiri, maka dx ke mana ya?)
-                dx = x;
+                dx = -x;
 
             }
             if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                 x += speed * delta;
                 // TODO 4: Ganti nilai dx sesuai dengan arahnya.
                 // (Kalau ke kanan, maka dx ke mana ya?)
-                dx = -x;
+                dx = x;
             }
         }
 
