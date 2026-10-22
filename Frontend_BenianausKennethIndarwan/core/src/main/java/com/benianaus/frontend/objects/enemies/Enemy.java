@@ -2,6 +2,7 @@ package com.benianaus.frontend.objects.enemies;
 import com.badlogic.gdx.graphics.Color;
 import com.benianaus.frontend.objects.GameObject;
 import com.benianaus.frontend.objects.Player;
+import com.benianaus.frontend.systems.SoundManager;
 
 public class Enemy extends GameObject {
 
@@ -32,6 +33,7 @@ public class Enemy extends GameObject {
         System.out.println(getName() + " took " + damage + " damage! HP: " + getHp() + "/" + getMaxHp());
         if (wasAlive && getHp() == 0) {
             System.out.println(getName() + " was defeated!");
+            SoundManager.getInstance().playEnemyDie();
             this.active = false;
             return true;
         }

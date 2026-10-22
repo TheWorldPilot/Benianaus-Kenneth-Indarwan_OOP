@@ -43,29 +43,13 @@ public class EntityFactory {
     }
 
     public static Boss createBoss(float x, float y, String name, int hp) {
-        // TODO:
-        // 1. Buat Boss baru dengan x, y, name, dan hp dari parameter;
-        //    simpan pada variabel lokal bernama `boss`.
-        // 2. Ambil animasi "boss_idle" melalui getAnimation(...)
-        //    dari AssetManager.getInstance(). Simpan hasilnya pada
-        //    variabel lokal bernama `idleAnim`.
-        // 3. Pasang idleAnim pada boss melalui boss.setAnimation(...).
-        // 4. Kembalikan boss.
         Boss boss = new Boss(x, y, name, hp);
-        Animation<TextureRegion> idleAnim = AssetManager.getInstance().getAnimation("rumiaIdleAnim");
+        Animation<TextureRegion> idleAnim = AssetManager.getInstance().getAnimation("boss_idle");
         boss.setAnimation(idleAnim);
         return boss;
     }
 
     public static Fairy createFairy(float x, float y, String name, int hp) {
-        // TODO:
-        // 1. Buat Fairy baru dengan x, y, name, dan hp dari parameter;
-        //    simpan pada variabel lokal bernama `fairy`.
-        // 2. Ambil animasi "fairy_idle_red" melalui getAnimation(...)
-        //    dari AssetManager.getInstance(). Simpan hasilnya pada
-        //    variabel lokal bernama `idleAnim`.
-        // 3. Pasang idleAnim pada fairy melalui fairy.setAnimation(...).
-        // 4. Kembalikan fairy.
         Fairy fairy = new Fairy(x, y, name, hp);
         Animation<TextureRegion> idleAnim = AssetManager.getInstance().getAnimation("fairy_idle_red");
         fairy.setAnimation(idleAnim);
@@ -73,14 +57,6 @@ public class EntityFactory {
     }
 
     public static Fairy createFairy(float x, float y, String name, int hp, String keyString) {
-        // TODO:
-        // 1. Buat Fairy baru dengan x, y, name, dan hp dari parameter;
-        //    simpan pada variabel lokal bernama `fairy`.
-        // 2. Ambil animasi untuk keyString melalui getAnimation(...)
-        //    dari AssetManager.getInstance(). Simpan hasilnya pada
-        //    variabel lokal bernama `idleAnim`.
-        // 3. Pasang idleAnim pada fairy melalui fairy.setAnimation(...).
-        // 4. Kembalikan fairy.
         Fairy fairy = new Fairy(x, y, name, hp);
         Animation<TextureRegion> idleAnim = AssetManager.getInstance().getAnimation(keyString);
         fairy.setAnimation(idleAnim);
@@ -88,25 +64,25 @@ public class EntityFactory {
     }
 
     public static Bullet createPlayerBullet(float x, float y, int damage, String spriteKey) {
-        // TODO 1: Ambil TextureRegion untuk spriteKey melalui getTextureRegion dari
+        // TODO-DONE 1: Ambil TextureRegion untuk spriteKey melalui getTextureRegion dari
         // AssetManager.getInstance(), lalu masukkan ke variabel lokal `sprite`.
         TextureRegion sprite = AssetManager.getInstance().getTextureRegion(spriteKey);
 
-        // TODO 2:
+        // TODO-DONE 2:
         // Buat Bullet baru dengan x, y, BulletType.AMULET, dan damage;
         // simpan pada variabel lokal `bullet`.
         Bullet bullet = new Bullet(x, y, BulletType.AMULET, damage);
-        // TODO 3:
+        // TODO-DONE 3:
         // Pasang sprite pada bullet melalui bullet.setSprite(...).
         bullet.setSprite(sprite);
 
-        // TODO 4:
+        // TODO-DONE 4:
         // Kembalikan bullet.
         return bullet;
     }
 
     public static Bullet createPlayerBullet(float x, float y, int damage) {
-        // TODO 5:
+        // TODO-DONE 5:
         // Kembalikan hasil call function createPlayerBullet sebelumnya tapi dengan parameter spriteKey diganti dengan "bullet_amulet".
         return createPlayerBullet(x,y, damage, "bullet_amulet");
     }

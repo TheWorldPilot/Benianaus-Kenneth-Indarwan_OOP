@@ -16,12 +16,12 @@ import com.benianaus.frontend.objects.Player;
 import com.benianaus.frontend.objects.GameObject;
 import com.benianaus.frontend.objects.items.ItemType;
 import com.benianaus.frontend.systems.AssetManager;
+import com.benianaus.frontend.systems.EntityFactory;
+import com.benianaus.frontend.systems.SoundManager;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.benianaus.frontend.systems.EntityFactory.*;
 
 public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
@@ -48,16 +48,18 @@ public class Main extends ApplicationAdapter {
         entities = new ArrayList<>();
 
         AssetManager.getInstance().init();
+        SoundManager.getInstance().init();
+        SoundManager.getInstance().playBGM();
 
-        player = createPlayer(280, 40, "Reimu Hakurei", 100, 15, 3);
-        Fairy fairyRed = createFairy(150, 380, "Red Fairy", 20);
-        Fairy fairyBlue = createFairy(250, 380, "Blue Fairy", 20, "fairy_idle_blue");
+        player = EntityFactory.createPlayer(280, 40, "Reimu Hakurei", 100, 15, 3);
+        Fairy fairyRed = EntityFactory.createFairy(150, 380, "Red Fairy", 20);
+        Fairy fairyBlue = EntityFactory.createFairy(250, 380, "Blue Fairy", 20, "fairy_idle_blue");
         fairy.add(fairyRed);
         fairy.add(fairyBlue);
-        boss = createBoss(380, 400, "Rumia", 150);
+        boss = EntityFactory.createBoss(380, 400, "Rumia", 150);
 
-        powerItem = createItem(200, 450, ItemType.POWER);
-        pointItem = createItem(320, 480, ItemType.POINT);
+        powerItem = EntityFactory.createItem(200, 450, ItemType.POWER);
+        pointItem = EntityFactory.createItem(320, 480, ItemType.POINT);
 
         entities.add(player);
         entities.add(fairyRed);
@@ -80,6 +82,7 @@ public class Main extends ApplicationAdapter {
         // Clue: Gdx.input.isKeyJustPressed()
         if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
             entities.add(player.shootBullet());
+            SoundManager.getInstance().playShoot();
         }
 
         // Panggil updateAndClean(entities, delta, Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
@@ -99,6 +102,7 @@ public class Main extends ApplicationAdapter {
                     b.onCollision(a);
 
                     if (b instanceof Item) {
+                        SoundManager.getInstance().playItemPickup();
                         entities.remove(b);
                     }
                 }
@@ -126,6 +130,7 @@ public class Main extends ApplicationAdapter {
 
         // TODO-DONE: Panggil dispose untuk AssetManager agar Texture yang dimuat juga dilepas.
         AssetManager.getInstance().dispose();
+        SoundManager.getInstance().dispose();
     }
 
 
