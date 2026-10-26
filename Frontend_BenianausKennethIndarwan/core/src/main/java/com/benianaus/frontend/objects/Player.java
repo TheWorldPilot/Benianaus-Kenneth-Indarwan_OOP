@@ -9,7 +9,11 @@ import com.benianaus.frontend.objects.bullets.BulletType;
 import com.benianaus.frontend.objects.enemies.Enemy;
 import com.benianaus.frontend.objects.items.Item;
 import com.benianaus.frontend.objects.items.ItemType;
+import com.benianaus.frontend.objects.patterns.ShootingPattern;
 import com.benianaus.frontend.systems.AssetManager;
+
+import com.badlogic.gdx.math.Rectangle;
+import com.benianaus.frontend.systems.BulletManager;
 
 import static com.benianaus.frontend.systems.EntityFactory.createPlayerBullet;
 
@@ -21,6 +25,8 @@ public class Player extends GameObject {
     private int spellCards;
     private long score;
     private int currentDir;
+
+    private ShootingPattern shootingPattern;
 
     public Player(String name, int hp, int power, int spellCards) {
         super(280, 40, 32, 48, 200, Color.RED);
@@ -85,10 +91,8 @@ public class Player extends GameObject {
 
     @Override
     public void update(float delta){
-        // TODO-DONE 1: panggil update(delta) milik GameObject melalui super.
         super.update(delta);
 
-        // TODO-DONE 2: Siapkan variabel lokal float dx dengan nilai awal 0
         // (dx = delta x, mencatat perubahan arah horizontal untuk animasi)
         float dx = 0;
 
@@ -101,27 +105,21 @@ public class Player extends GameObject {
             }
             if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                 x -= speed * delta;
-                // TODO 3: Ganti nilai dx sesuai dengan arahnya.
-                // (Kalau ke kiri, maka dx ke mana ya?)
                 dx = -x;
 
             }
             if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                 x += speed * delta;
-                // TODO 4: Ganti nilai dx sesuai dengan arahnya.
-                // (Kalau ke kanan, maka dx ke mana ya?)
                 dx = x;
             }
         }
 
-        // TODO 5-DONE: Panggil updateAnimationState(dx)
         updateAnimationState(dx);
     }
 
     public void updateAnimationState(float dx) {
         AssetManager assets = AssetManager.getInstance();
         if (dx < 0) {
-            // TODO:
             // 1. Lanjutkan perubahan hanya jika currentDir bukan -1.
             // 2. Ubah currentDir menjadi -1.
             // 3. Ambil animasi "player_left" melalui assets.getAnimation(...).
@@ -133,7 +131,6 @@ public class Player extends GameObject {
                 setAnimation(anim);
             }
         } else if (dx > 0) {
-            // TODO:
             // 1. Lanjutkan perubahan hanya jika currentDir bukan 1.
             // 2. Ubah currentDir menjadi 1.
             // 3. Ambil animasi "player_right" melalui assets.getAnimation(...).
@@ -145,7 +142,6 @@ public class Player extends GameObject {
                 setAnimation(anim);
             }
         } else {
-            // TODO:
             // 1. Lanjutkan perubahan hanya jika currentDir bukan 0.
             // 2. Ubah currentDir menjadi 0.
             // 3. Ambil animasi "player_idle" melalui assets.getAnimation(...).
@@ -177,6 +173,13 @@ public class Player extends GameObject {
         // kembalikan Bullet baru, diposisikan di tengah atas Player
         // (x + width/2 - 4, y + height), bertipe BulletType.AMULET, dengan damage di atas
         return createPlayerBullet(x+width/2-4, y+height, damage);
+    }
+
+    // Perbarui method shootBullet() jadi shootBullet(BulletManager bulletManager)!
+    public void shootBullet(BulletManager bulletManager) {
+        if (bulletManager == null) return;  // - Jika bulletManager bernilai null, hentikan eksekusi
+        if (shootingPattern != null) shootingPattern.execute(x + width / 2f - 8f, y + height, bulletManager, true);    // - Jika shootingPattern tidak null, panggil execute() pada posisi moncong player (x + width / 2f - 8f, y + height)
+        if (shootingPattern == null) bulletManager.spawnPlayerBullet(x, y, 0, 400f, (10+power));                                     // - Jika shootingPattern bernilai null, panggil bulletManager.spawnPlayerBullet() secara langsung
     }
 
     public String getName() {
@@ -264,8 +267,17 @@ public class Player extends GameObject {
         item.destroy();
     }
 
+    @Override
+    public Rectangle getCoreHitbox() {
+        // Kembalikan objek Rectangle baru berukuran 8x8 yang berpusat tepat di tengah sprite:
+        return new Rectangle((x+(width/2f)-4f), (y+(height/2f)-4f), 8f, 8f);   // - koordinat X: x + (width / 2f) - 4f
+                                                                    // - koordinat Y: y + (height / 2f) - 4f
+                                                                    // - lebar: 8f, tinggi: 8f
+    }
 
-
-
-
+    @Override
+    public Rectangle getGrazeHitbox() {
+        // Kembalikan objek Rectangle baru dengan koordinat posisi (x, y) dan ukuran seluas sprite visual karakter (width, height)
+        return new Rectangle(x, y, width, height);
+    }
 }

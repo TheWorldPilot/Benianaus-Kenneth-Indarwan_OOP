@@ -15,9 +15,7 @@ import com.benianaus.frontend.objects.items.Item;
 import com.benianaus.frontend.objects.Player;
 import com.benianaus.frontend.objects.GameObject;
 import com.benianaus.frontend.objects.items.ItemType;
-import com.benianaus.frontend.systems.AssetManager;
-import com.benianaus.frontend.systems.EntityFactory;
-import com.benianaus.frontend.systems.SoundManager;
+import com.benianaus.frontend.systems.*;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -39,6 +37,10 @@ public class Main extends ApplicationAdapter {
     protected Animation<TextureRegion> animation;
     protected float stateTime = 0f;
 
+    private BulletManager bulletManager;
+    private CollisionReferee collisionReferee;
+    private float enemyShootTimer = 0f;
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -50,6 +52,9 @@ public class Main extends ApplicationAdapter {
         AssetManager.getInstance().init();
         SoundManager.getInstance().init();
         SoundManager.getInstance().playBGM();
+
+        bulletManager = new BulletManager();
+        collisionReferee = new CollisionReferee();
 
         player = EntityFactory.createPlayer(280, 40, "Reimu Hakurei", 100, 15, 3);
         Fairy fairyRed = EntityFactory.createFairy(150, 380, "Red Fairy", 20);
@@ -81,13 +86,17 @@ public class Main extends ApplicationAdapter {
         // Jika tombol Z baru saja ditekan, tambahkan bullet baru hasil player.shootBullet() ke dalam list entities.
         // Clue: Gdx.input.isKeyJustPressed()
         if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
-            entities.add(player.shootBullet());
+            player.shootBullet(bulletManager);
             SoundManager.getInstance().playShoot();
         }
+
+        updateEnemyScheduler(delta);
 
         // Panggil updateAndClean(entities, delta, Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
         // untuk meng-update sekaligus membersihkan entity yang destroyed/off-screen.
         updateAndClean(entities, delta, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        bulletManager.update(delta, screenWidth, screenHeight);
 
         // AABB Collision detection antara setiap pasangan unik entity
         for (int i = 0; i < entities.size(); i++) {
@@ -113,13 +122,21 @@ public class Main extends ApplicationAdapter {
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
 
         batch.begin();
+        bulletManager.render(batch);
         for (GameObject entity : entities) {
             if (!entity.isDestroyed()) {
-                // TODO-DONE: Buat agar setiap entity melakukan method .render() dengan mengoper parameter SpriteBatch.
                 entity.render(batch);
             }
         }
         batch.end();
+    }
+
+    private void updateEnemyScheduler(float delta) {
+        enemyShootTimer += delta;
+        if (enemyShootTimer >= 1.5f) {
+            boss.shootBullet(bulletManager);
+            enemyShootTimer = 0f;
+        }
     }
 
     @Override
@@ -128,22 +145,14 @@ public class Main extends ApplicationAdapter {
             batch.dispose();
         }
 
-        // TODO-DONE: Panggil dispose untuk AssetManager agar Texture yang dimuat juga dilepas.
         AssetManager.getInstance().dispose();
         SoundManager.getInstance().dispose();
     }
 
 
     public <T extends GameObject> void updateAndClean(List<T> list, float delta, float screenWidth, float screenHeight) {
-        // 1. Dapatkan Iterator<T> dari list yang diberikan.
         Iterator<T> it = list.iterator();
 
-        // 2. Selama masih ada elemen berikutnya (hasNext()):
-        //    a. Ambil elemen saat ini menggunakan next(), simpan ke variabel bertipe T.
-        //    b. Panggil update(delta) pada elemen tersebut.
-        //    c. Jika elemen tersebut isOffScreen(screenWidth, screenHeight) ATAU isDestroyed():
-        //       - Tampilkan pesan: "Removed via Generic Iterator: " + [nama class entity, pakai getClass().getSimpleName()]
-        //       - Hapus elemen ini dari list menggunakan method milik Iterator (BUKAN list.remove()!).
         while(it.hasNext()){
             T currElement = it.next();
             currElement.update(delta);
