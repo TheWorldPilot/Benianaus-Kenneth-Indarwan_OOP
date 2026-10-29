@@ -77,7 +77,7 @@ public class Bullet extends GameObject {
         this.y = y;
         this.vx = vx;
         this.vy = vy;
-        this.angle = (float) Math.toDegrees(Math.atan2(vy, vx));    // 2. Hitung sudut rotasi `angle` menggunakan rumus Math.atan2 sebagaimana dijelaskan di atas, lalu ganti ke degree.
+        this.angle = (float) Math.toDegrees(Math.atan2(vy, vx))-90;    // 2. Hitung sudut rotasi `angle` menggunakan rumus Math.atan2 sebagaimana dijelaskan di atas, lalu ganti ke degree.
         this.speed = (float) Math.hypot(vx, vy);                    // 3. Perbarui nilai `speed` dengan menghitung panjang resultan kedua vektor kecepatan menggunakan rumus: Math.hypot sebagaimana dijelaskan di paragraf atas.
         this.bulletType = bulletType;                               // 4. Simpan atribut identitas peluru (bulletType, damage, dan isPlayerBullet) sesuai nilai parameter
         this.damage = damage;

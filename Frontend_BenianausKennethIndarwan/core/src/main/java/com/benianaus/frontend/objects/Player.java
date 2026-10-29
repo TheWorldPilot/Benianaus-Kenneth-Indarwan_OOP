@@ -14,6 +14,7 @@ import com.benianaus.frontend.systems.AssetManager;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.benianaus.frontend.systems.BulletManager;
+import com.benianaus.frontend.systems.SoundManager;
 
 import static com.benianaus.frontend.systems.EntityFactory.createPlayerBullet;
 
@@ -178,7 +179,7 @@ public class Player extends GameObject {
     // Perbarui method shootBullet() jadi shootBullet(BulletManager bulletManager)!
     public void shootBullet(BulletManager bulletManager) {
         if (bulletManager == null) return;  // - Jika bulletManager bernilai null, hentikan eksekusi
-        if (shootingPattern != null) shootingPattern.execute(x + width / 2f - 8f, y + height, bulletManager, true);    // - Jika shootingPattern tidak null, panggil execute() pada posisi moncong player (x + width / 2f - 8f, y + height)
+        if (shootingPattern != null) shootingPattern.execute(x + width / 2f - 10f, y + height, bulletManager, true);    // - Jika shootingPattern tidak null, panggil execute() pada posisi moncong player (x + width / 2f - 8f, y + height)
         if (shootingPattern == null) bulletManager.spawnPlayerBullet(x, y, 0, 400f, (10+power));                                     // - Jika shootingPattern bernilai null, panggil bulletManager.spawnPlayerBullet() secara langsung
     }
 
@@ -220,6 +221,7 @@ public class Player extends GameObject {
 
     public void collectItem(Item item) {
         if (item.isDestroyed()) return;
+        SoundManager.getInstance().playItemPickup();
 
         System.out.println(getName() + " collected " + item.getItemType() + "!");
 

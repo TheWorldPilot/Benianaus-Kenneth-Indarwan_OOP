@@ -78,11 +78,6 @@ public class Main extends ApplicationAdapter {
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
-        // Update logic: items move downwards linearly
-        for (GameObject obj : entities) {
-            obj.update(delta);
-        }
-
         // Jika tombol Z baru saja ditekan, tambahkan bullet baru hasil player.shootBullet() ke dalam list entities.
         // Clue: Gdx.input.isKeyJustPressed()
         if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
@@ -96,27 +91,12 @@ public class Main extends ApplicationAdapter {
         // untuk meng-update sekaligus membersihkan entity yang destroyed/off-screen.
         updateAndClean(entities, delta, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        bulletManager.update(delta, screenWidth, screenHeight);
+        bulletManager.update(delta, Gdx.graphics.getWidth(),  Gdx.graphics.getHeight());
 
-        // AABB Collision detection antara setiap pasangan unik entity
-        for (int i = 0; i < entities.size(); i++) {
-            for (int j = i + 1; j < entities.size(); j++) {
-                GameObject a = entities.get(i);
-                GameObject b = entities.get(j);
+        collisionReferee.resolveCollisions(player, entities, bulletManager);
 
-                // Cek apakah getCoreHitbox() milik a dan b saling overlap (gunakan method .overlaps() milik Rectangle)
-                if ((a.getCoreHitbox()).overlaps(b.getCoreHitbox())) {
-                    // Panggil a.onCollision(b) dan b.onCollision(a)
-                    a.onCollision(b);
-                    b.onCollision(a);
 
-                    if (b instanceof Item) {
-                        SoundManager.getInstance().playItemPickup();
-                        entities.remove(b);
-                    }
-                }
-            }
-        }
+
 
         // Clear screen
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);

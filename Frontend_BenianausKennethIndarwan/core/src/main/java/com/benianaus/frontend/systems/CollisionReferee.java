@@ -12,6 +12,9 @@ import java.util.List;
 
 public class CollisionReferee {
 
+    private int collisionCooldown;
+    private long currTime;
+
     public void resolveCollisions(Player player, List<GameObject> entities, BulletManager bulletManager) {
         if (player == null || entities == null || bulletManager == null) return;
 
@@ -24,7 +27,8 @@ public class CollisionReferee {
             for (GameObject listEntity : entities){
                 if (listEntity instanceof Enemy && !listEntity.isDestroyed()){
                     if (listEntity.getCoreHitbox().overlaps(listElement.getCoreHitbox())){
-                        boolean defeated = listEntity.takeDamage(bullet.getDamage());
+                        boolean defeated = ((Enemy) listEntity).takeDamage(listElement.getDamage());
+                        listElement.destroy();
                         if (defeated){
                             player.addScore(((Enemy) listEntity).getScoreValue());
                             newDrops.add(EntityFactory.createItem(listEntity.getX(), listEntity.getY(), ItemType.POWER));
@@ -35,15 +39,16 @@ public class CollisionReferee {
         }
 
         // 2. Evaluasi bullet Musuh vs Pemain (Core Hit vs Graze Hit)
-        for (GameObject listElement : bulletManager.getActivePlayerBullets()) {
+        for (Bullet listElement : bulletManager.getActiveEnemyBullets()) {
             if (listElement.isDestroyed()) continue;
             if (player.isAlive()){
                 if (player.getCoreHitbox().overlaps(listElement.getCoreHitbox())){
-                    player.takeDamage(bullet.getDamage());
-                    bullet.destroy();
-                } else if (bullet.hasBeenGrazed() && bullet.getCoreHitbox().overlaps(player.getGrazeHitbox())){
-                    bullet.hasBeenGrazed = true;
+                    player.takeDamage(listElement.getDamage());
+                    listElement.destroy();
+                } else if (!listElement.hasBeenGrazed() && listElement.getCoreHitbox().overlaps(player.getGrazeHitbox())){
+                    listElement.setGrazed(true);
                     player.addScore(50);
+                    System.out.println("[CollisionReferee] GRAZE! " + player.getName() + " grazed an enemy bullet (+50 pts)!");
                 }
 
             }
@@ -54,7 +59,7 @@ public class CollisionReferee {
             if (listEntity.isDestroyed()) continue;
 
             if (listEntity instanceof Item item){
-                if (item.getCoreHitbox().overlaps(listEntity.getCoreHitbox()) || item.getCoreHitbox().overlaps(player.getGrazeHitbox())){
+                if (item.getCoreHitbox().overlaps(player.getCoreHitbox()) || item.getCoreHitbox().overlaps(player.getGrazeHitbox())){
                     player.collectItem(item);
                 }
             } else if (listEntity instanceof Enemy enemy){

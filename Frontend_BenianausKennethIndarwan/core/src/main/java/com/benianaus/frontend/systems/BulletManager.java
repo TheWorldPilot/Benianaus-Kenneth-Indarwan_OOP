@@ -25,7 +25,7 @@ public class BulletManager {
     // Peminjaman bullet Pemain dari Pool
     public Bullet spawnPlayerBullet(float x, float y, float vx, float vy, int damage) {
         Bullet bullet;
-        if (playerBulletPool != null) {                           // 1. Cek apakah playerBulletPool tidak kosong.
+        if (!playerBulletPool.isEmpty()) {                           // 1. Cek apakah playerBulletPool tidak kosong.
             bullet = playerBulletPool.poll();                     // Kalau ya, poll dari pool. Kalau tidak, buat baru menggunakan Factory.
         } else {
             bullet = EntityFactory.createPlayerBullet(x, y, damage);
@@ -38,7 +38,7 @@ public class BulletManager {
     // Peminjaman bullet Musuh dari Pool
     public Bullet spawnEnemyBullet(float x, float y, float vx, float vy, int damage) {
         Bullet bullet;
-        if (enemyBulletPool != null) {                         // 1. Cek apakah enemyBulletPool tidak kosong:
+        if (!enemyBulletPool.isEmpty()) {                         // 1. Cek apakah enemyBulletPool tidak kosong:
             bullet = enemyBulletPool.poll();                   // Kalau ya, poll dari pool. Kalau tidak, buat baru menggunakan Factory.
         } else {
             bullet = EntityFactory.createEnemyBullet(x, y, damage);
@@ -63,7 +63,6 @@ public class BulletManager {
             currElement.update(delta);
             if (currElement.isOffScreen(screenWidth, screenHeight) || currElement.isDestroyed()){
                 currElement.destroy();
-                System.out.println("Removed via Generic Iterator: " + currElement.getClass().getSimpleName());
                 it_player.remove();
                 playerBulletPool.offer(currElement);
             }
@@ -77,7 +76,6 @@ public class BulletManager {
             currElement.update(delta);
             if (currElement.isOffScreen(screenWidth, screenHeight) || currElement.isDestroyed()){
                 currElement.destroy();
-                System.out.println("Removed via Generic Iterator: " + currElement.getClass().getSimpleName());
                 it_enemy.remove();
                 enemyBulletPool.offer(currElement);
             }
