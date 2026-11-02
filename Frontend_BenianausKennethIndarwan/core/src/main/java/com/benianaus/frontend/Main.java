@@ -9,6 +9,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.Input;
 import java.util.Iterator;
+
+import com.benianaus.frontend.commands.Command;
+import com.benianaus.frontend.commands.InputHandler;
 import com.benianaus.frontend.objects.enemies.Boss;
 import com.benianaus.frontend.objects.enemies.Fairy;
 import com.benianaus.frontend.objects.items.Item;
@@ -16,6 +19,7 @@ import com.benianaus.frontend.objects.Player;
 import com.benianaus.frontend.objects.GameObject;
 import com.benianaus.frontend.objects.items.ItemType;
 import com.benianaus.frontend.systems.*;
+import com.benianaus.frontend.ui.GameHUD;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -39,6 +43,8 @@ public class Main extends ApplicationAdapter {
 
     private BulletManager bulletManager;
     private CollisionReferee collisionReferee;
+    private InputHandler inputHandler;
+    private GameHUD gameHUD;
     private float enemyShootTimer = 0f;
 
     @Override
@@ -55,52 +61,58 @@ public class Main extends ApplicationAdapter {
 
         bulletManager = new BulletManager();
         collisionReferee = new CollisionReferee();
+        inputHandler = new InputHandler();
+        gameHUD = new GameHUD();
 
-        player = EntityFactory.createPlayer(280, 40, "Reimu Hakurei", 100, 15, 3);
-        Fairy fairyRed = EntityFactory.createFairy(150, 380, "Red Fairy", 20);
-        Fairy fairyBlue = EntityFactory.createFairy(250, 380, "Blue Fairy", 20, "fairy_idle_blue");
-        fairy.add(fairyRed);
-        fairy.add(fairyBlue);
-        boss = EntityFactory.createBoss(380, 400, "Rumia", 150);
+        player = EntityFactory.createPlayer(200, 50, "Reimu Hakurei", 100, 15, 3);
+        fairy.add(EntityFactory.createFairy(150, 380, "Red Fairy", 20));
+        fairy.add(EntityFactory.createFairy(250, 380, "Blue Fairy", 20, "fairy_idle_blue"));
+        boss = EntityFactory.createBoss(250, 400, "Rumia", 150);
+        powerItem = EntityFactory.createItem(180, 450, ItemType.POWER);
+        pointItem = EntityFactory.createItem(220, 480, ItemType.POINT);
 
-        powerItem = EntityFactory.createItem(200, 450, ItemType.POWER);
-        pointItem = EntityFactory.createItem(320, 480, ItemType.POINT);
+        player.registerObserver(gameHUD);
 
         entities.add(player);
-        entities.add(fairyRed);
-        entities.add(fairyBlue);
+        entities.addAll(fairy);
         entities.add(boss);
         entities.add(powerItem);
         entities.add(pointItem);
+
+        inputHandler.setEntities(entities);
     }
 
     @Override
     public void render() {
         float delta = Gdx.graphics.getDeltaTime();
 
-        // Jika tombol Z baru saja ditekan, tambahkan bullet baru hasil player.shootBullet() ke dalam list entities.
-        // Clue: Gdx.input.isKeyJustPressed()
-        if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
-            player.shootBullet(bulletManager);
-            SoundManager.getInstance().playShoot();
+        // Restart Game on 'R' key when Game Over
+        if (Gdx.input != null && Gdx.input.isKeyJustPressed(Input.Keys.R) && player.isGameOver()) {
+            restartGame();
         }
 
+        // 1. Proses seluruh input pemain melalui Command Pattern (Invoker Command Stream)
+        List<Command> commands = inputHandler.handleInput(delta);
+        for (Command command : commands){
+            command.execute(player, bulletManager);
+        }
+
+        // Scheduler tembakan berkala Bos
         updateEnemyScheduler(delta);
 
-        // Panggil updateAndClean(entities, delta, Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
-        // untuk meng-update sekaligus membersihkan entity yang destroyed/off-screen.
-        updateAndClean(entities, delta, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        // 3. Generic update & clean untuk entitas standar pada batas Playfield (416, 560)
+        updateAndClean(entities, delta, 416, 560);
 
-        bulletManager.update(delta, Gdx.graphics.getWidth(),  Gdx.graphics.getHeight());
+        // 4. Update dan daur ulang Object Pool pada batas Playfield (416, 560)
+        bulletManager.update(delta, 416, 560);
 
+        // 5. Evaluasi tabrakan melalui Mediator Pattern (CollisionReferee)
         collisionReferee.resolveCollisions(player, entities, bulletManager);
 
-
-
-
-        // Clear screen
+        // 6. Bersihkan layar
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
 
+        // 7. Render sprite entitas aktif, peluru pool, dan teks Observer GameHUD
         batch.begin();
         bulletManager.render(batch);
         for (GameObject entity : entities) {
@@ -108,7 +120,13 @@ public class Main extends ApplicationAdapter {
                 entity.render(batch);
             }
         }
+        gameHUD.render(batch);
         batch.end();
+
+        // 8. Render garis bingkai UI & indikator Core Hitbox Focus Mode (Digambar DI ATAS sprite!)
+        gameHUD.renderBackground();
+        player.renderFocusIndicator(gameHUD.getShapeRenderer());
+
     }
 
     private void updateEnemyScheduler(float delta) {
@@ -123,6 +141,10 @@ public class Main extends ApplicationAdapter {
     public void dispose() {
         if (batch != null) {
             batch.dispose();
+        }
+
+        if (gameHUD != null){
+            gameHUD.dispose();
         }
 
         AssetManager.getInstance().dispose();
@@ -141,6 +163,27 @@ public class Main extends ApplicationAdapter {
                 it.remove();
             }
         }
+    }
+
+    private void restartGame() {
+        System.out.println("[Main] Restarting game...");
+        entities.clear();
+        bulletManager.clearEnemyBullets();
+        bulletManager.clearPlayerBullets();
+        entities.add(player);
+        player.resetGame();
+
+        fairy.clear();
+        fairy.add(EntityFactory.createFairy(150, 380, "Red Fairy", 20));
+        fairy.add(EntityFactory.createFairy(250, 380, "Blue Fairy", 20, "fairy_idle_blue"));
+        boss = EntityFactory.createBoss(250, 400, "Rumia", 150);
+        powerItem = EntityFactory.createItem(180, 450, ItemType.POWER);
+        pointItem = EntityFactory.createItem(220, 480, ItemType.POINT);
+
+        entities.addAll(fairy);
+        entities.add(boss);
+        entities.add(powerItem);
+        entities.add(pointItem);
     }
 
 }

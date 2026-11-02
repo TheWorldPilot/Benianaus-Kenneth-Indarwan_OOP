@@ -41,13 +41,18 @@ public class CollisionReferee {
         // 2. Evaluasi bullet Musuh vs Pemain (Core Hit vs Graze Hit)
         for (Bullet listElement : bulletManager.getActiveEnemyBullets()) {
             if (listElement.isDestroyed()) continue;
+
             if (player.isAlive()){
                 if (player.getCoreHitbox().overlaps(listElement.getCoreHitbox())){
-                    player.takeDamage(listElement.getDamage());
+                    if (!player.isInvulnerable()) {
+                        System.out.println("[CollisionReferee] CORE HIT! Enemy Bullet hit " + player.getName() + " for " + listElement.getDamage() + " DMG!");
+                        player.takeDamage(100, bulletManager, entities);
+                    };
                     listElement.destroy();
+                    break;
                 } else if (!listElement.hasBeenGrazed() && listElement.getCoreHitbox().overlaps(player.getGrazeHitbox())){
                     listElement.setGrazed(true);
-                    player.addScore(50);
+                    player.addGraze();
                     System.out.println("[CollisionReferee] GRAZE! " + player.getName() + " grazed an enemy bullet (+50 pts)!");
                 }
 
@@ -64,7 +69,10 @@ public class CollisionReferee {
                 }
             } else if (listEntity instanceof Enemy enemy){
                 if (player.getCoreHitbox().overlaps(enemy.getCoreHitbox())){
-                    player.takeDamage(10);
+                    if (!player.isInvulnerable()) {
+                        player.takeDamage(100, bulletManager, entities);
+                        System.out.println("[CollisionReferee] CORE COLLISION! Player collided with " + enemy.getName() + "!");
+                    }
                 }
             }
         }

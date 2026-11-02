@@ -1,8 +1,10 @@
 package com.benianaus.frontend.systems;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.benianaus.frontend.objects.GameObject;
 import com.benianaus.frontend.objects.bullets.Bullet;
 import com.benianaus.frontend.objects.bullets.BulletType;
+import com.benianaus.frontend.objects.items.ItemType;
 
 import java.util.*;
 
@@ -88,6 +90,46 @@ public class BulletManager {
         }
         for (Bullet b : activeEnemyBullets) {
             if (!b.isDestroyed()) b.render(batch);
+        }
+    }
+
+    // Eksekusi Spell Card (Bomb): Hapus seluruh peluru musuh aktif dan ubah menjadi drop item POINT!
+    public void clearEnemyBullets(List<GameObject> entities) {
+        // TODO:
+        // 1. Buat Iterator<Bullet> untuk menelusuri activeEnemyBullets secara aman.
+        // 2. Selama masih ada elemen berikutnya di iterator:
+        //    - Ambil objek Bullet saat ini.
+        //    - Jika parameter entities tidak bernilai null:
+        //      * Buat objek Item bertipe ItemType.POINT menggunakan EntityFactory.createItem(...)
+        //        pada posisi (bullet.getX(), bullet.getY()), lalu tambahkan ke dalam list entities.
+        //    - Tandai bullet sebagai hancur (bullet.destroy()).
+        //    - Hapus bullet dari activeEnemyBullets menggunakan remove() pada iterator di step 1.
+        //    - Kembalikan bullet ke dalam antrean enemyBulletPool menggunakan offer().
+        // TIP: Lihat rough outlinenya di `clearPlayerBullets()` di bawah
+        Iterator<Bullet> it_bullet = activeEnemyBullets.iterator();
+        while (it_bullet.hasNext()) {
+            Bullet bullet = it_bullet.next();
+            if (entities != null) {
+                entities.add(EntityFactory.createItem(bullet.getX(), bullet.getY(), ItemType.POINT));
+                bullet.destroy();
+                it_bullet.remove();
+                enemyBulletPool.offer(bullet);
+            }
+        }
+    }
+
+    public void clearEnemyBullets() {
+        clearEnemyBullets(null);
+    }
+
+    // Pembersihan seluruh peluru pemain saat restart permainan (Copy-Paste):
+    public void clearPlayerBullets() {
+        Iterator<Bullet> pIter = activePlayerBullets.iterator();
+        while (pIter.hasNext()) {
+            Bullet bullet = pIter.next();
+            bullet.destroy();
+            pIter.remove();
+            playerBulletPool.offer(bullet);
         }
     }
 }
