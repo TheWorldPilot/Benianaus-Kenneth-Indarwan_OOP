@@ -17,8 +17,8 @@ public class InputHandler {
     // Lalu isi masing-masing attribut dengan sebuah key dari Input.Keys sesuai dengan kesukaan kalian. (Contoh: `int keyShoot = Input.Keys.Z`)
     // Ini adalah tombol yang kalian harus tekan di keyboard kalian untuk melakukan aksi-aksi tersebut.
     private int keyShoot = Input.Keys.Z;
-    private int keyBomb = Input.Keys.T;
-    private int keyFocus = Input.Keys.F;
+    private int keyBomb = Input.Keys.X;
+    private int keyFocus = Input.Keys.SHIFT_LEFT;
 
     // 2. Slot Command Pre-allocated (Zero-GC Invoker)
     // Buat field private untuk:
@@ -62,12 +62,12 @@ public class InputHandler {
         return keyBomb;
     }
 
-    public void setKeyBomb(int keyShoot){
+    public void setKeyBomb(int keyBomb){
         this.keyBomb = keyBomb;
     }
 
     public int getKeyFocus(){
-        return keyShoot;
+        return keyFocus;
     }
 
     public void setKeyFocus(int keyFocus){

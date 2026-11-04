@@ -161,8 +161,8 @@ public class Player extends GameObject {
             } else {
                 bulletManager.spawnPlayerBullet(x + width / 2f - 8f, y + height, 0, 400f, 10 + power);
             }
+            shootTimer = 0;     // Reset shootTimer kembali ke 0
         }
-        shootTimer = 0;     // Reset shootTimer kembali ke 0
     }
 
     public ShootingPattern getShootingPattern() { return shootingPattern; }
