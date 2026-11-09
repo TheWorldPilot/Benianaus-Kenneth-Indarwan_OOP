@@ -5,6 +5,7 @@ import com.benianaus.frontend.objects.Collidable;
 import com.benianaus.frontend.objects.GameObject;
 import com.badlogic.gdx.graphics.Color;
 import com.benianaus.frontend.objects.enemies.Enemy;
+import com.benianaus.frontend.objects.patterns.bulletStrategy.BulletMovementPattern;
 
 public class Bullet extends GameObject {
     private BulletType bulletType;
@@ -13,6 +14,7 @@ public class Bullet extends GameObject {
     private float angle = 90f;      // 2. float angle dengan nilai awal 90f (sudut rotasi visual peluru dalam derajat)
     private boolean isPlayerBullet; // 3. boolean isPlayerBullet (penanda apakah peluru ini milik player atau musuh)
     private boolean grazed;         // 4. boolean grazed (penanda apakah peluru ini sudah pernah di-graze oleh player)
+    private BulletMovementPattern movementPattern;
 
     public Bullet(float x, float y, BulletType bulletType, int damage) {
         super(x, y, 16, 16, 400f, Color.YELLOW);
@@ -43,8 +45,14 @@ public class Bullet extends GameObject {
     @Override
     public void update(float delta) {
         super.update(delta);
-        x += vx*delta;   // 1. Perbarui posisi x bertambah sebesar komponen kecepatan vx dikali delta
-        y += vy*delta;   // 2. Perbarui posisi y bertambah sebesar komponen kecepatan vy dikali delta
+        // Periksa apakah movementPattern tidak bernilai null:
+        if (movementPattern != null){
+            movementPattern.move(this, delta);      // - Jika ada (tidak null): delegasikan pergerakan ke movementPattern.move(this, delta);
+        } else {
+            // - Jika null: pertahankan pergerakan bawaan (tambahkan x sebesar vx * delta dan y sebesar vy * delta)
+            x += vx*delta;   // 1. Perbarui posisi x bertambah sebesar komponen kecepatan vx dikali delta
+            y += vy*delta;   // 2. Perbarui posisi y bertambah sebesar komponen kecepatan vy dikali delta
+        }
     }
 
     @Override
@@ -85,6 +93,7 @@ public class Bullet extends GameObject {
         this.active = true;                         // 5. Aktifkan kembali peluru ini (active) dan mulai ulang waktu state animasinya (stateTime) dari 0
         this.stateTime = 0;
         this.grazed = false;                        // 6. Pastikan status graze (grazed) direset menjadi tidak aktif agar peluru daur ulang ini dapat di-graze kembali
+        this.movementPattern = null;
     }
 
     @Override
@@ -125,5 +134,12 @@ public class Bullet extends GameObject {
 
     public void setGrazed(boolean grazed){  // 4. Buat setter setGrazed(boolean grazed)
         this.grazed = grazed;
+    }
+
+    public BulletMovementPattern getMovementPattern() { return movementPattern; }
+    public void setMovementPattern(BulletMovementPattern movementPattern) { this.movementPattern = movementPattern; }
+
+    public float getStateTime(){
+        return stateTime;
     }
 }

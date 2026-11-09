@@ -35,11 +35,16 @@ public class EntityFactory {
     }
 
     // Membuat peluru musuh (tipe DANMAKU, speed 0f, sprite bullet_danmaku)
-    public static Bullet createEnemyBullet(float x, float y, int damage) {
+    public static Bullet createEnemyBullet(float x, float y, int damage, String spriteKey) {
+        String key = (spriteKey != null) ? spriteKey : "bullet_danmaku";
         Bullet bullet = new Bullet(x, y, 0f, BulletType.DANMAKU, damage);
-        TextureRegion sprite = AssetManager.getInstance().getTextureRegion("bullet_danmaku");
+        TextureRegion sprite = AssetManager.getInstance().getTextureRegion(key);
         bullet.setSprite(sprite);
         return bullet;
+    }
+
+    public static Bullet createEnemyBullet(float x, float y, int damage) {
+        return createEnemyBullet(x, y, damage, "bullet_danmaku");
     }
 
     public static Boss createBoss(float x, float y, String name, int hp) {

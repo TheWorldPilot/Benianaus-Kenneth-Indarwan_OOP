@@ -12,6 +12,13 @@ import com.benianaus.frontend.objects.enemies.Enemy;
 import com.benianaus.frontend.objects.items.Item;
 import com.benianaus.frontend.objects.items.ItemType;
 import com.benianaus.frontend.objects.patterns.ShootingPattern;
+import com.benianaus.frontend.objects.patterns.bulletStrategy.HomingBulletMovement;
+import com.benianaus.frontend.objects.patterns.entityStrategy.FixedMovement;
+import com.benianaus.frontend.objects.patterns.entityStrategy.LinearEntityMovement;
+import com.benianaus.frontend.objects.patterns.shootingStrategy.CompositeShootingPattern;
+import com.benianaus.frontend.objects.patterns.shootingStrategy.FrontShot;
+import com.benianaus.frontend.objects.patterns.shootingStrategy.SideShot;
+import com.benianaus.frontend.objects.patterns.shootingStrategy.SpreadShot;
 import com.benianaus.frontend.observers.GameObserver;
 import com.benianaus.frontend.systems.AssetManager;
 
@@ -24,7 +31,7 @@ import java.util.List;
 
 import static com.benianaus.frontend.systems.EntityFactory.createPlayerBullet;
 
-public class Player extends GameObject {
+public class Player extends EntityShooter {
 
     private String name;
     private int hp;
@@ -35,8 +42,15 @@ public class Player extends GameObject {
     private int currentDir;
     private int grazeCount = 0;
     private boolean focused = false;
-    private float shootTimer = 0.1f;
-    private float shootCooldown = 0.1f;
+
+    private float shootCooldown = 5f / 60f; // 5 frame pada 60 FPS (12 tembakan/detik)
+    private float shootTimer = shootCooldown;
+    private float homingCooldown = 30f / 60f; // 30 frame (0.5s) atau 15 frame (0.25s)
+    private float homingShootTimer = homingCooldown;
+
+    private ShootingPattern mainShootingPattern;
+    private ShootingPattern sideShootingPattern;
+
     private float invulnerableTimer = 0f;
 
     private ShootingPattern shootingPattern;
@@ -45,21 +59,25 @@ public class Player extends GameObject {
     private List<GameObserver> observers = new ArrayList<>();
 
     public Player(String name, int hp, int power, int spellCards) {
-        super(280, 40, 32, 48, 200, Color.RED);
+        super(280, 40, 32, 48, 240f, Color.RED);
         this.name = name;
         this.hp = hp;
         this.power = power;
         this.spellCards = spellCards;
         this.score = 0;
+        setMovementPattern(new FixedMovement());
+        updatePowerStrategy();
     }
 
     public Player(float x, float y, String name, int hp, int power, int spellCards) {
-        super(x, y, 32, 48, 200, Color.RED);
+        super(x, y, 32, 48, 240f, Color.RED);
         this.name = name;
         this.hp = hp;
         this.power = power;
         this.spellCards = spellCards;
         this.score = 0;
+        setMovementPattern(new FixedMovement());
+        updatePowerStrategy();
     }
 
 
@@ -86,6 +104,12 @@ public class Player extends GameObject {
     public void update(float delta) {
         super.update(delta); // Advances stateTime for idle animations
         shootTimer += delta;
+        homingShootTimer += delta;
+
+        if (shootTimer > 0.15f) {
+            shootTimer = shootCooldown;
+            homingShootTimer = homingCooldown;
+        }
 
         if (invulnerableTimer > 0f) {
             invulnerableTimer -= delta;
@@ -151,17 +175,27 @@ public class Player extends GameObject {
         return createPlayerBullet(x+width/2-4, y+height, damage);
     }
 
+    @Override
     public void shootBullet(BulletManager bulletManager) {
         if (bulletManager == null) return;
-
-        // Cek apakah shootTimer sudah lebih besar atau sama dengan shootCooldown.
         if (shootTimer >= shootCooldown) {
-            if (shootingPattern != null) {
+            // TODO (2 poin): Di line ini, cek jika mainShootingPattern tidak null. Apabila ya, maka panggil mainShootingPattern.execute(x + width / 2f - 8f, y + height, bulletManager, true) di dalamnya. Kemudian ubah `if` di bawah ini (yang di kalian persis mengecek `shootingPattern != null`) menjadi `else if`
+            if (mainShootingPattern != null){
+                mainShootingPattern.execute(x + width / 2f - 8f, y + height, bulletManager, true);
+            }
+            else if (shootingPattern != null) {
                 shootingPattern.execute(x + width / 2f - 8f, y + height, bulletManager, true);
             } else {
                 bulletManager.spawnPlayerBullet(x + width / 2f - 8f, y + height, 0, 400f, 10 + power);
             }
-            shootTimer = 0;     // Reset shootTimer kembali ke 0
+            shootTimer = 0f;
+        }
+
+        // TODO (2 poin): Jika sideShootingPattern tidak null dan homingShootTimer lebih dari sama dengan homingCooldown,
+        // panggil sideShootingPattern.execute(x + width / 2f - 8f, y + height, bulletManager, true) lalu reset homingShootTimer ke nol.
+        if (sideShootingPattern != null && homingShootTimer >= homingCooldown){
+            sideShootingPattern.execute(x + width / 2f - 8f, y + height, bulletManager, true);
+            homingShootTimer = 0;
         }
     }
 
@@ -192,6 +226,7 @@ public class Player extends GameObject {
 
     public void setPower(int power){
         this.power = power;
+        updatePowerStrategy();
         notifyPowerChanged();
     }
 
@@ -244,14 +279,28 @@ public class Player extends GameObject {
 
     // Eksekusi Spell Card (Bomb) dari BombCommand
     public void useBomb(BulletManager bulletManager, List<GameObject> entities) {
-        if (spellCards > 0){
+        if (spellCards > 0) {
             spellCards--;
+            invulnerableTimer = 5.0f; // 5 seconds invulnerability during Fantasy Seal!
             notifySpellCardsChanged();
-            invulnerableTimer = 5.0f;
-            if (bulletManager != null){
+            if (bulletManager != null) {
                 bulletManager.clearEnemyBullets(entities);
+
+                // Cari target musuh aktif untuk dikejar (Boss atau Fairy)
+                GameObject target = null;
+                if (entities != null) {
+                    for (GameObject obj : entities) {
+                        if (obj instanceof Enemy enemy && !enemy.isDestroyed()) {
+                            target = enemy;
+                            break;
+                        }
+                    }
+                }
+
+                // TODO (2 poin): Panggil metode spawnBombOrbs pada bulletManager dari titik tengah Player (x + width / 2f, y + height / 2f) dengan argumen target dan entities
+                bulletManager.spawnBombOrbs(x + width / 2f, y + height / 2f, target, entities);
             }
-            System.out.println(name + " unleashes SPELL CARD (Fantasy Seal)! All enemy bullets cleared!");
+            System.out.println(name + " unleashes SPELL CARD: Spirit Sign Fantasy Seal (霊符「夢想封印」)! All enemy bullets cleared & 8 homing orbs launched!");
         } else {
             System.out.println("No Spell Cards (Bombs) remaining!");
         }
@@ -304,7 +353,10 @@ public class Player extends GameObject {
     }
 
     public void setFocused(boolean focused){
-        this.focused = focused;
+        if (this.focused != focused) {
+            this.focused = focused;
+            updatePowerStrategy();
+        }
     }
 
     public int getGrazeCount(){
@@ -362,13 +414,16 @@ public class Player extends GameObject {
         this.hp = 100;
         this.invulnerableTimer = 3.0f;
         this.power = Math.max(10, this.power - 16); // Penalti death Touhou
+        updatePowerStrategy();
         this.spellCards = 3; // Reset bomb menjadi 3 saat respawn
+
     }
 
     public void resetGame() {
         this.lives = 3;
         this.hp = 100;
         this.power = 15;
+        updatePowerStrategy();
         this.spellCards = 3;
         this.score = 0;
         this.grazeCount = 0;
@@ -392,6 +447,7 @@ public class Player extends GameObject {
             switch (type) {
                 case POWER -> {
                     this.power += type.getPowerBonus();
+                    updatePowerStrategy();
                     notifyPowerChanged();
                     addScore(item.getScoreValue());
                     System.out.println(name + " collected POWER item! Power increased to " + power);
@@ -517,4 +573,73 @@ public class Player extends GameObject {
             obs.onGrazeChanged(grazeCount);
         }
     }
+
+    // Terapkan Dynamic Strategy Swapping pada Player Reimu
+    public void updatePowerStrategy() {
+        float spreadAngle = focused ? 4f : 18f;
+        float dualSpreadAngle = focused ? 3f : 12f;
+        float sideHOffset = focused ? 8f : 24f;
+        float sideVOffset = focused ? 16f : -16f;
+        float leftAngle = focused ? 100f : 120f;
+        float rightAngle = focused ? 80f : 60f;
+
+        float normalSpeed = 720f;
+        float homingSpeed = 500f;
+
+        // 2. Evaluasi jenjang nilai power pemain (Authentic Touhou 6 EoSD Power Ranks):
+        if (power < 8) {
+            // Rank 1 (Power 0 - 7): 1 Tembakan Lurus Tengah
+            mainShootingPattern = new FrontShot(normalSpeed, 48);
+            sideShootingPattern = null;
+            homingCooldown = 30f / 60f;
+        } else if (power < 16) {
+            // Rank 2 (Power 8 - 15): 1 Tembakan Lurus + 2 Jimat Sayap Terpandu (Homing SideShot)
+            mainShootingPattern = new FrontShot(normalSpeed, 48);
+            sideShootingPattern = new SideShot(homingSpeed, 14, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing");
+            homingCooldown = 30f / 60f;
+        } else if (power < 32) {
+            // Rank 3 (Power 16 - 31): 2 Tembakan Kipas Lurus Rapat + 2 Jimat Sayap Terpandu
+            mainShootingPattern = new SpreadShot(normalSpeed, 2, dualSpreadAngle, 30, 8f, null, null, null);
+            sideShootingPattern = new SideShot(homingSpeed, 14, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing");
+        } else if (power < 48) {
+            // Rank 4 (Power 32 - 47): 3 Tembakan Kipas Menyebar + 2 Jimat Sayap Terpandu
+            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, 0, null, null, null);
+            sideShootingPattern = new SideShot(homingSpeed, 14, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing");
+            homingCooldown = 30f / 60f;
+        } else if (power < 64) {
+            // Rank 5 (Power 48 - 63): 3 Tembakan Kipas + Jimat Terpandu (Cadence dipercepat ke 15 frames / 0.25s!)
+            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, 0, null, null, null);
+            sideShootingPattern = new SideShot(homingSpeed, 12, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing");
+            homingCooldown = 15f / 60f;
+        } else if (power < 80) {
+            // Rank 6 (Power 64 - 79): 3 Tembakan Kipas + 4 Jimat Terpandu (Composite Pattern)
+            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, 0, null, null, null);
+            sideShootingPattern = new CompositeShootingPattern(new SideShot(homingSpeed, 9, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing"), new SideShot(homingSpeed, 12, sideHOffset + 4f, sideVOffset, leftAngle + 30f, rightAngle - 30f, true, new HomingBulletMovement(360f), "bullet_amulet_homing"));
+            homingCooldown = 15f / 60f;
+        } else if (power < 128) {
+            // Rank 7 & 8 (Power 80 - 127): 3 Tembakan Kipas + 4 Jimat Terpandu Sudut Rapat
+            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, 0, null, null, null);
+            sideShootingPattern = new CompositeShootingPattern(new SideShot(homingSpeed, 8, sideHOffset, sideVOffset, leftAngle - 10f, rightAngle + 10f, true, new HomingBulletMovement(360f), "bullet_amulet_homing"), new SideShot(homingSpeed, 8, sideHOffset + 4f, sideVOffset, leftAngle + 10f, rightAngle - 10f, true, new HomingBulletMovement(360f), "bullet_amulet_homing"));
+            homingCooldown = 15f / 60f;
+        } else {
+            // Rank 9 (Power 128 MAX): 4 Tembakan Kipas Berjarak + 6 Jimat Terpandu Maksimal
+            mainShootingPattern = new SpreadShot(normalSpeed, 4, spreadAngle*1.2f, 24, 16f, null, null, null);
+            sideShootingPattern = new CompositeShootingPattern(new SideShot(homingSpeed, 8, sideHOffset, sideVOffset, leftAngle - 10f, rightAngle + 10f, true,  new HomingBulletMovement (360f), "bullet_amulet_homing"),
+                                                                new SideShot(homingSpeed, 8, sideHOffset + 4f, sideVOffset, leftAngle + 10f, rightAngle - 10f, true, new HomingBulletMovement(360f), "bullet_amulet_homing"),
+                                                                new SideShot(homingSpeed, 8, sideHOffset + 8f, sideVOffset, leftAngle + 30f, rightAngle - 30f, true, new HomingBulletMovement(360f), "bullet_amulet_homing"));
+            homingCooldown = 15f / 60f;
+        }
+
+        // 3. Pasang strategi komposit ke atribut superclass EntityShooter
+        if (sideShootingPattern != null) {
+            setShootingPattern(new CompositeShootingPattern(mainShootingPattern, sideShootingPattern));
+        } else {
+            setShootingPattern(mainShootingPattern);
+        }
+    }
+
+    public ShootingPattern getMainShootingPattern() { return mainShootingPattern; }
+    public ShootingPattern getSideShootingPattern() { return sideShootingPattern; }
+    public float getShootCooldown() { return shootCooldown; }
+    public float getHomingCooldown() { return homingCooldown; }
 }
