@@ -148,6 +148,7 @@ public class Main extends ApplicationAdapter {
         enemyShootTimer += delta;
         if (enemyShootTimer >= 1.5f && boss != null && !boss.isDestroyed()) {
             // TODO (4 poin): Suruh boss tembak!
+            boss.shootBullet(bulletManager);
             enemyShootTimer = 0f;
         }
 

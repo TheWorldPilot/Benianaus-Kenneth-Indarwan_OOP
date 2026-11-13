@@ -1,20 +1,16 @@
 package com.benianaus.frontend.objects;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.benianaus.frontend.objects.bullets.Bullet;
-import com.benianaus.frontend.objects.bullets.BulletType;
 import com.benianaus.frontend.objects.enemies.Enemy;
 import com.benianaus.frontend.objects.items.Item;
 import com.benianaus.frontend.objects.items.ItemType;
 import com.benianaus.frontend.objects.patterns.ShootingPattern;
 import com.benianaus.frontend.objects.patterns.bulletStrategy.HomingBulletMovement;
 import com.benianaus.frontend.objects.patterns.entityStrategy.FixedMovement;
-import com.benianaus.frontend.objects.patterns.entityStrategy.LinearEntityMovement;
 import com.benianaus.frontend.objects.patterns.shootingStrategy.CompositeShootingPattern;
 import com.benianaus.frontend.objects.patterns.shootingStrategy.FrontShot;
 import com.benianaus.frontend.objects.patterns.shootingStrategy.SideShot;
@@ -24,7 +20,6 @@ import com.benianaus.frontend.systems.AssetManager;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.benianaus.frontend.systems.BulletManager;
-import com.benianaus.frontend.systems.SoundManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -603,22 +598,22 @@ public class Player extends EntityShooter {
             sideShootingPattern = new SideShot(homingSpeed, 14, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing");
         } else if (power < 48) {
             // Rank 4 (Power 32 - 47): 3 Tembakan Kipas Menyebar + 2 Jimat Sayap Terpandu
-            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, 0, null, null, null);
+            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, null);
             sideShootingPattern = new SideShot(homingSpeed, 14, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing");
             homingCooldown = 30f / 60f;
         } else if (power < 64) {
             // Rank 5 (Power 48 - 63): 3 Tembakan Kipas + Jimat Terpandu (Cadence dipercepat ke 15 frames / 0.25s!)
-            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, 0, null, null, null);
+            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, null);
             sideShootingPattern = new SideShot(homingSpeed, 12, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing");
             homingCooldown = 15f / 60f;
         } else if (power < 80) {
             // Rank 6 (Power 64 - 79): 3 Tembakan Kipas + 4 Jimat Terpandu (Composite Pattern)
-            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, 0, null, null, null);
+            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, null);
             sideShootingPattern = new CompositeShootingPattern(new SideShot(homingSpeed, 9, sideHOffset, sideVOffset, leftAngle, rightAngle, true, new HomingBulletMovement(360f), "bullet_amulet_homing"), new SideShot(homingSpeed, 12, sideHOffset + 4f, sideVOffset, leftAngle + 30f, rightAngle - 30f, true, new HomingBulletMovement(360f), "bullet_amulet_homing"));
             homingCooldown = 15f / 60f;
         } else if (power < 128) {
             // Rank 7 & 8 (Power 80 - 127): 3 Tembakan Kipas + 4 Jimat Terpandu Sudut Rapat
-            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, 0, null, null, null);
+            mainShootingPattern = new SpreadShot(normalSpeed, 3, spreadAngle, 26, null);
             sideShootingPattern = new CompositeShootingPattern(new SideShot(homingSpeed, 8, sideHOffset, sideVOffset, leftAngle - 10f, rightAngle + 10f, true, new HomingBulletMovement(360f), "bullet_amulet_homing"), new SideShot(homingSpeed, 8, sideHOffset + 4f, sideVOffset, leftAngle + 10f, rightAngle - 10f, true, new HomingBulletMovement(360f), "bullet_amulet_homing"));
             homingCooldown = 15f / 60f;
         } else {

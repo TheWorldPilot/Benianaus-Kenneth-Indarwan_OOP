@@ -6,11 +6,11 @@ import com.benianaus.frontend.objects.patterns.shootingStrategy.FrontShot;
 
 public class Fairy extends Enemy{
     protected String name;
-    protected int hp;
-    protected int maxHp;
-    protected long scoreValue;
-    private int collisionCooldown;
-    private long currTime;
+    private float shootTimer = 0f;
+    private float shootDelay = 0.67f;
+    private float shootInterval = 1.4f;
+    private int maxShots = 2;
+    private int shotsFired = 0;
 
     public Fairy(String name, int hp){
         super(150, 380, 24, 24, Color.PINK, name, hp, 500L);

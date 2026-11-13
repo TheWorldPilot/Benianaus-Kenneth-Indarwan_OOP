@@ -169,7 +169,7 @@ public class AssetManager {
 
         registerRegionFromSheet("bullet_amulet", "amulet_reimu.png", 16, 16, 0, 0);
         registerRegionFromSheet("bullet_amulet_homing", "amulet_reimu.png", 16, 16, 1, 0);
-        registerRegionFromSheet("bullet_danmaku", "bullets_small.png", 16, 16, 2, 0);
+        // registerRegionFromSheet("bullet_danmaku", "bullets_small.png", 16, 16, 2, 0);
 
         registerRegionFromSheet("bullet_danmaku",        "bullets_small.png", 16, 16, 2, 3); // Default / Blue
         registerRegionFromSheet("bullet_danmaku_blue",   "bullets_small.png", 16, 16, 2, 3);
